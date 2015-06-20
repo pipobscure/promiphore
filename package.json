@@ -4,7 +4,7 @@
   "description": "FS (flock) and Promise based Semaphore",
   "main": "promiphore.js",
   "scripts": {
-    "test": "tap test.js"
+    "test": "node --harmony test.js"
   },
   "repository": {
     "type": "git",
@@ -23,5 +23,8 @@
   "homepage": "https://github.com/pipobscure/promiphore#readme",
   "dependencies": {
     "fs-ext": "^0.4.5"
+  },
+  "devDependencies": {
+    "tap": "^1.2.0"
   }
 }

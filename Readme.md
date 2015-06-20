@@ -1,5 +1,7 @@
 # PromiPhore
 
+[![Build Status](https://secure.travis-ci.org/pipobscure/promiphore.png)](http://travis-ci.org/#!/pipobscure/promiphore)
+
 This is a simple mechanism to lock resources and control simultaneous access to them. It uses flock file-locking and promises to ensure that only one action is ever accessing a resource.
 
 ## Install

@@ -43,7 +43,7 @@ function lock(fd, timeout, retryfn) {
       tryLock(fd).then(resolve, catcher);
     }
     function catcher(err) {
-      if (err.errno !== 35) return reject(err);
+      if ((err.code+'') !== 'EAGAIN') return reject(err);
       if (timeout && ((Date.now()-started)>timeout)) return reject(err);
       retryfn.call(instance, runner);
     }
