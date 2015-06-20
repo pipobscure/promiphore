@@ -8,16 +8,16 @@ This is a simple mechanism to lock resources and control simultaneous access to 
 
 ## Example
 
-    var pp = require('@pipobscure/promiphore');
+    var promiphore = require('promiphore');
 
-    pp('resource-name').then(function(unlock) {
+    promiphore('resource-name').then(function(unlock) {
       console.log('locked');
       setTimeout(function() {
         console.log('unlock');
         unlock();
       }, 1000);
     });
-    pp('resource-name').then(function(unlock) {
+    promiphore('resource-name').then(function(unlock) {
       console.log('locked');
       setTimeout(function() {
         console.log('unlock');
