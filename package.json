@@ -1,0 +1,27 @@
+{
+  "name": "promiphore",
+  "version": "0.1.0",
+  "description": "FS (flock) and Promise based Semaphore",
+  "main": "promiphore.js",
+  "scripts": {
+    "test": "tap test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pipobscure/promiphore.git"
+  },
+  "keywords": [
+    "flock",
+    "semaphore",
+    "promise"
+  ],
+  "author": "Philipp Dunkel <pip@pipobscure.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pipobscure/promiphore/issues"
+  },
+  "homepage": "https://github.com/pipobscure/promiphore#readme",
+  "dependencies": {
+    "fs-ext": "^0.4.5"
+  }
+}
