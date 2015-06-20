@@ -1,5 +1,10 @@
+/*
+** © 2015 by Philipp Dunkel <pip@pipobscure.com>
+** Licensed under MIT License
+*/
+
 var tap = require('tap');
-var pp = require('./promiphore');
+var promiphore = require('./promiphore');
 var fs = require('fs');
 
 tap.test('concurrent', function (t) {
@@ -13,23 +18,23 @@ tap.test('concurrent', function (t) {
 
   var all=[];
   for (var cnt=0; cnt<starting; cnt++) {
-    all[cnt]=pp(resource).then(locked);
+    all[cnt]=promiphore(resource).then(locked);
   }
   function locked(unlock) {
     return new Promise(exec).then(finish);
-  }
-  function exec(resolve, reject) {
-    running++;
-    t.equal(1, running, 'there should be 1 processing only');
-    setTimeout(done, delay);
-  }
-  function done() {
-    running--;
-    t.equal(0, running, 'there should be none processing');
-    unlock().then(resolve, reject);
-  }
-  function finish() {
-    complete++;
+    function exec(resolve, reject) {
+      running++;
+      t.equal(1, running, 'there should be 1 processing only');
+      setTimeout(done, delay);
+      function done() {
+        running--;
+        t.equal(0, running, 'there should be none processing');
+        unlock().then(resolve, reject);
+      }
+    }
+    function finish() {
+      complete++;
+    }
   }
 
   Promise.all(all).then(function() {
@@ -39,3 +44,69 @@ tap.test('concurrent', function (t) {
   });
 });
 
+tap.test('timeout', function(t) {
+  t.plan(1);
+  var resource = 'test';
+  promiphore(resource).then(function(done) {
+    return promiphore(resource, 1000).then(function(unlock) {
+      t.ok(false, 'this.should never be reached');
+      unlock();
+    }, function(err) {
+      t.ok(err.errno===35, 'this should timeout to EAGAIN');
+    }).then(done);
+  }).then(function() {
+    t.end();
+  });
+});
+
+tap.test('retry', function(t) {
+  var resource = 'test';
+  var retries = 10;
+  var tries = 0;
+  t.plan(retries + 2);
+  promiphore(resource).then(function(done) {
+    return promiphore(resource, 0, retry).then(function(unlock) {
+      t.ok(true, 'complete');
+      return unlock();
+    }, function(err) {
+      t.ok(false, 'unexpected error');
+    });
+    function retry(fn) {
+      if (!tries) {
+        t.ok(!this.tries, 'good: no tries yes');
+      } else {
+        t.ok(this.tries === tries, 'good: storing state works');
+      }
+      this.tries = (tries += 1);
+      setTimeout(fn, 100);
+      if (tries === retries) done();
+    }
+  }).then(function() {
+    t.ok(tries === retries, 'retried correct number of times');
+    t.end();
+  });
+});
+
+/*
+** The MIT License (MIT)
+** 
+** Copyright (c) 2015 Philipp Dunkel
+** 
+** Permission is hereby granted, free of charge, to any person obtaining a copy
+** of this software and associated documentation files (the "Software"), to deal
+** in the Software without restriction, including without limitation the rights
+** to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+** copies of the Software, and to permit persons to whom the Software is
+** furnished to do so, subject to the following conditions:
+** 
+** The above copyright notice and this permission notice shall be included in all
+** copies or substantial portions of the Software.
+** 
+** THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+** IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+** FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+** AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+** LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+** OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+** SOFTWARE.
+*/
